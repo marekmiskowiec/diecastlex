@@ -1,0 +1,51 @@
+---
+title: "Czy Toy # w Hot Wheels jest unikalny?"
+description: "Czym jest Toy # (numer produktu Mattela), jak zmieniało się jego nadawanie w 2011 roku i dlaczego nie warto używać go jako unikalnego klucza w bazie kolekcji."
+date: "2026-10-16"
+tags: ["hot wheels", "identyfikacja", "baza danych"]
+---
+
+Budując katalog kolekcji, szybko dochodzi się do pytania: czy numer **Toy #** z opakowania (np. `T9673`) jednoznacznie wskazuje model? Krótka odpowiedź brzmi: **nie w całej historii, ale od 2011 roku w praktyce dość blisko**. Poniżej to, co udało się potwierdzić w źródłach, i to, czego nie.
+
+## Czym jest Toy #
+
+Toy # to kod produktu nadawany przez Mattela konkretnemu wydaniu zabawki. Nie należy go mylić z **numerem kolekcjonerskim** (np. „123/250”), który określa miejsce modelu w danej serii i powtarza się z roku na rok. Kolekcjonerzy traktują Toy # jako jedną z cech potwierdzających wydanie, obok serii, numeru kolekcjonerskiego, przypisania do asortymentu i ewentualnej wyłączności sklepu ([Muncle Mike's](https://munclemikes.com/pages/identify-hot-wheels-casting)).
+
+## Przed 2011: numer odlewu
+
+Według [opracowania na 164custom](https://164custom.com/hot-wheels-part-numbers-explained-2011_HW.html) przed 2011 rokiem numer odpowiadał **odlewowi, a nie kolorowi**. Przykład: '67 Pontiac Firebird 400 z 2010 roku miał numer `R0971` i występował w trzech kolorach pod tym samym numerem.
+
+## Od 2011: numer modelu w kolorze
+
+Od 2011 roku, jak opisuje to samo źródło, **każda kombinacja modelu i koloru dostaje własny numer**. Przykład: '10 Ford Shelby GT-500 Super Snake z 2011 roku występował jako niebieski (`T9673`), bordowy (`T9932`) i żółty (`T9994`).
+
+## Czego nie wiemy
+
+Nie znalazłem w sprawdzonych źródłach odpowiedzi na dwa pytania:
+
+- czy numery bywają **ponownie używane** w późniejszych latach,
+- jak numeracja wygląda dla **wariantów w obrębie jednego koloru** (inne felgi, drobne różnice w tampodruku, błędy fabryczne).
+
+Do tego starsze modele często w ogóle nie mają Toy #. Dlatego nie należy zakładać, że numer jest unikalny.
+
+## Co z tego wynika dla bazy danych
+
+Przy projektowaniu bazy kolekcji:
+
+1. **Kluczem głównym** zrób identyfikator techniczny (UUID), a nie Toy #.
+2. Kolumnę `toy_number` zostaw jako **zwykły indeks** do wyszukiwania, bez ograniczenia `unique`, i pozwól na wartość pustą.
+3. Podczas importu danych z publicznych katalogów **policz duplikaty** Toy #. To najszybszy sposób, by sprawdzić na prawdziwych danych, jak często numer się powtarza.
+4. Jeśli warianty okażą się ważne, dodaj osobną tabelę wariantów powiązaną z modelem.
+
+```sql
+create table models (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  toy_number text -- nieunikalny, może być pusty
+);
+create index models_toy_number on models (toy_number);
+```
+
+## Podsumowanie
+
+Toy # to dobra wskazówka przy identyfikacji wydania, zwłaszcza dla modeli od 2011 roku, ale nie gwarancja unikalności. Traktuj go jak cenną etykietę, a nie jak klucz.
