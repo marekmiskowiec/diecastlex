@@ -1,0 +1,2 @@
+# Uzupełni `supabase init`; trzymamy plik, żeby migracje były w repo.
+project_id = "diecastlex"
