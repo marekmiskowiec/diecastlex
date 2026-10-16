@@ -1,11 +1,11 @@
 ---
 title: "Czy Toy # w Hot Wheels jest unikalny?"
-description: "Czym jest Toy # (numer produktu Mattela), jak zmieniało się jego nadawanie w 2011 roku i dlaczego nie warto używać go jako unikalnego klucza w bazie kolekcji."
+description: "Czym jest Toy # (numer produktu Mattela), jak zmieniło się jego nadawanie w 2011 roku i na ile można na nim polegać przy rozpoznawaniu wydania."
 date: "2026-10-16"
-tags: ["hot wheels", "identyfikacja", "baza danych"]
+tags: ["hot wheels", "identyfikacja", "Toy #"]
 ---
 
-Budując katalog kolekcji, szybko dochodzi się do pytania: czy numer **Toy #** z opakowania (np. `T9673`) jednoznacznie wskazuje model? Krótka odpowiedź brzmi: **nie w całej historii, ale od 2011 roku w praktyce dość blisko**. Poniżej to, co udało się potwierdzić w źródłach, i to, czego nie.
+Przeglądając swoją kolekcję, prędzej czy później dochodzi się do pytania: czy numer **Toy #** z opakowania (np. `T9673`) jednoznacznie wskazuje model? Krótka odpowiedź brzmi: **nie w całej historii, ale od 2011 roku w praktyce dość blisko**. Poniżej to, co udało się potwierdzić w źródłach, i to, czego nie.
 
 ## Czym jest Toy #
 
@@ -26,26 +26,8 @@ Nie znalazłem w sprawdzonych źródłach odpowiedzi na dwa pytania:
 - czy numery bywają **ponownie używane** w późniejszych latach,
 - jak numeracja wygląda dla **wariantów w obrębie jednego koloru** (inne felgi, drobne różnice w tampodruku, błędy fabryczne).
 
-Do tego starsze modele często w ogóle nie mają Toy #. Dlatego nie należy zakładać, że numer jest unikalny.
-
-## Co z tego wynika dla bazy danych
-
-Przy projektowaniu bazy kolekcji:
-
-1. **Kluczem głównym** zrób identyfikator techniczny (UUID), a nie Toy #.
-2. Kolumnę `toy_number` zostaw jako **zwykły indeks** do wyszukiwania, bez ograniczenia `unique`, i pozwól na wartość pustą.
-3. Podczas importu danych z publicznych katalogów **policz duplikaty** Toy #. To najszybszy sposób, by sprawdzić na prawdziwych danych, jak często numer się powtarza.
-4. Jeśli warianty okażą się ważne, dodaj osobną tabelę wariantów powiązaną z modelem.
-
-```sql
-create table models (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  toy_number text -- nieunikalny, może być pusty
-);
-create index models_toy_number on models (toy_number);
-```
+Dlatego nie należy zakładać, że numer jest unikalny.
 
 ## Podsumowanie
 
-Toy # to dobra wskazówka przy identyfikacji wydania, zwłaszcza dla modeli od 2011 roku, ale nie gwarancja unikalności. Traktuj go jak cenną etykietę, a nie jak klucz.
+Toy # to dobra wskazówka przy identyfikacji wydania, zwłaszcza dla modeli od 2011 roku, ale nie gwarancja, że dwa różne modele nie mają tego samego numeru. Przy rozpoznawaniu wydania sprawdzaj go razem z serią, numerem kolekcjonerskim i kolorem.
